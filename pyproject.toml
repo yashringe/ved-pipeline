@@ -1,0 +1,73 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vedpipe"
+version = "0.1.0"
+description = "Partner trip ingestion, curation and fleet-energy KPIs on the Vehicle Energy Dataset (VED)."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+# The core package has no third-party dependencies beyond tz data, so every
+# component image installs only the extra it needs.
+dependencies = ["tzdata>=2024.1"]
+
+[project.optional-dependencies]
+api = [
+    "fastapi>=0.115,<1",
+    "uvicorn[standard]>=0.30",
+    "pydantic>=2.7,<3",
+    "boto3>=1.34",
+]
+sim = [
+    "requests>=2.32",
+    "py7zr>=0.21",
+    "pandas>=2.1,<2.3",
+    "numpy>=1.26,<2",
+]
+spark = [
+    "pyspark[sql]==3.5.3",
+    # PySpark 3.5 predates NumPy 2 and pandas 2.3; pin to the combination it was tested with.
+    "pandas>=2.1,<2.3",
+    "numpy>=1.26,<2",
+    "pyarrow>=15,<18",
+]
+load = [
+    "psycopg[binary]>=3.2,<4",
+    "pyarrow>=15,<18",
+    "pandas>=2.1,<2.3",
+    "openpyxl>=3.1",
+    "boto3>=1.34",
+]
+dashboard = [
+    "streamlit>=1.38,<2",
+    "altair>=5.3,<6",
+    "psycopg[binary]>=3.2,<4",
+    "pandas>=2.1,<2.3",
+]
+dev = [
+    "pytest>=8.2",
+    "ruff>=0.6",
+    "httpx>=0.27",  # required by fastapi.testclient
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+filterwarnings = ["ignore::DeprecationWarning:pyspark.*"]
+markers = ["spark: needs pyspark and a Java 17 runtime"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "C4", "PT", "RUF"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["vedpipe"]
